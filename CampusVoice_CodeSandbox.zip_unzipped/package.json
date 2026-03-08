@@ -1,0 +1,14 @@
+{
+  "name": "campusvoice-backend",
+  "type": "module",
+  "scripts": {
+    "backend": "node backend/server.js",
+    "frontend": "cd src/react-app && npm run dev",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\""
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "concurrently": "^8.2.2"
+  }
+}
