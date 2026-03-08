@@ -4,11 +4,11 @@
   "scripts": {
     "backend": "node backend/server.js",
     "frontend": "cd src/react-app && npm run dev",
-    "dev": "concurrently \"npm run backend\" \"npm run frontend\""
+    "dev": "concurrently \"node backend/server.js\" \"cd src/react-app && npx vite --host 0.0.0.0 --port 5173\""
   },
   "dependencies": {
-    "express": "^4.18.2",
+    "concurrently": "^8.2.2",
     "cors": "^2.8.5",
-    "concurrently": "^8.2.2"
+    "express": "^4.18.2"
   }
 }
