@@ -16,7 +16,7 @@ export default defineConfig({
 	  server: {
   host: true,
   port: 5173,
-  allowedHosts: true
+  allowedHosts: "xwcc7z-5173.csb.app" 
 	  },
   build: {
     chunkSizeWarningLimit: 5000,
