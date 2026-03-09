@@ -1,23 +1,16 @@
 import path from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { cloudflare } from "@cloudflare/vite-plugin";
 import { mochaPlugins } from "@getmocha/vite-plugins";
 
 export default defineConfig({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-	  plugins: [
-	    ...mochaPlugins(process.env as any),
-	    react(),
-	    cloudflare({
-	      auxiliaryWorkers: [{ configPath: "/mocha/emails-service/wrangler.json" }],
-	    }),
-	  ],
-	  server: {
-  host: true,
-  port: 5173,
-  allowedHosts: ['.csb.app'] 
-	  },
+  plugins: [...mochaPlugins(process.env as any), react()],
+  server: {
+    host: true,
+    port: 5173,
+    allowedHosts: [".csb.app"],
+  },
   build: {
     chunkSizeWarningLimit: 5000,
   },

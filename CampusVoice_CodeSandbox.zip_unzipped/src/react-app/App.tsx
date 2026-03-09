@@ -1,9 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@getmocha/users-service/react";
-import HomePage from "@/react-app/pages/Home";
-import TrackPage from "@/react-app/pages/Track";
-import AdminPage from "@/react-app/pages/Admin";
-import AuthCallback from "@/react-app/pages/AuthCallback";
+
+import HomePage from "./pages/Home";
+import TrackPage from "./pages/Track";
+import AdminPage from "./pages/Admin";
+import AuthCallback from "./pages/AuthCallback";
 
 export default function App() {
   return (

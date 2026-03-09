@@ -1,8 +1,8 @@
-import * as React from "react"
-import { Accordion as AccordionPrimitive } from "radix-ui"
+import * as React from "react";
+import { Accordion as AccordionPrimitive } from "radix-ui";
 
-import { cn } from "@/react-app/lib/utils"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { cn } from "@/react-app/lib/utils";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 function Accordion({
   className,
@@ -11,10 +11,13 @@ function Accordion({
   return (
     <AccordionPrimitive.Root
       data-slot="accordion"
-      className={cn("overflow-hidden rounded-2xl border flex w-full flex-col", className)}
+      className={cn(
+        "overflow-hidden rounded-2xl border flex w-full flex-col",
+        className
+      )}
       {...props}
     />
-  )
+  );
 }
 
 function AccordionItem({
@@ -24,10 +27,13 @@ function AccordionItem({
   return (
     <AccordionPrimitive.Item
       data-slot="accordion-item"
-      className={cn("data-[state=open]:bg-muted/50 [&:not(:last-child)]:border-b", className)}
+      className={cn(
+        "data-[state=open]:bg-muted/50 [&:not(:last-child)]:border-b",
+        className
+      )}
       {...props}
     />
-  )
+  );
 }
 
 function AccordionTrigger({
@@ -46,11 +52,17 @@ function AccordionTrigger({
         {...props}
       >
         {children}
-        <ChevronDown data-slot="accordion-trigger-icon" className="pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden" />
-        <ChevronUp data-slot="accordion-trigger-icon" className="pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline" />
+        <ChevronDown
+          data-slot="accordion-trigger-icon"
+          className="pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
+        />
+        <ChevronUp
+          data-slot="accordion-trigger-icon"
+          className="pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
+        />
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
-  )
+  );
 }
 
 function AccordionContent({
@@ -73,7 +85,7 @@ function AccordionContent({
         {children}
       </div>
     </AccordionPrimitive.Content>
-  )
+  );
 }
 
-export { Accordion, AccordionItem, AccordionTrigger, AccordionContent }
+export { Accordion, AccordionItem, AccordionTrigger, AccordionContent };

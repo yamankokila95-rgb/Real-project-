@@ -1,8 +1,8 @@
-import * as React from "react"
-import { Checkbox as CheckboxPrimitive } from "radix-ui"
+import * as React from "react";
+import { Checkbox as CheckboxPrimitive } from "radix-ui";
 
-import { cn } from "@/react-app/lib/utils"
-import { Check } from "lucide-react"
+import { cn } from "@/react-app/lib/utils";
+import { Check } from "lucide-react";
 
 function Checkbox({
   className,
@@ -24,7 +24,7 @@ function Checkbox({
         <Check />
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
-  )
+  );
 }
 
-export { Checkbox }
+export { Checkbox };
