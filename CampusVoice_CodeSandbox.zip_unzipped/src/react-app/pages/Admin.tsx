@@ -1,24 +1,24 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@getmocha/users-service/react";
-import Header from "@/react-app/components/Header";
-import { Button } from "@/react-app/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/react-app/components/ui/card";
-import { Textarea } from "@/react-app/components/ui/textarea";
-import { Badge } from "@/react-app/components/ui/badge";
+import Header from "../components/components/Header";
+import { Button } from "../components/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/components/ui/card";
+import { Textarea } from "../components/components/ui/textarea";
+import { Badge } from "../components/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/react-app/components/ui/select";
+} from "../components/components/ui/select";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/react-app/components/ui/dialog";
+} from "../components/components/ui/dialog";
 import {
   Shield,
   LogOut,
