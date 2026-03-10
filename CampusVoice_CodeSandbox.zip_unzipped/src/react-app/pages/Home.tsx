@@ -2,146 +2,148 @@ import { useState } from "react";
 
 export default function Home() {
 
-  const [title,setTitle]=useState("");
-  const [description,setDescription]=useState("");
-  const [category,setCategory]=useState("");
-  const [location,setLocation]=useState("");
+  const [title,setTitle] = useState("");
+  const [description,setDescription] = useState("");
+  const [category,setCategory] = useState("");
+  const [location,setLocation] = useState("");
 
   const submitIssue = async (e:any) => {
     e.preventDefault();
 
-    const res = await fetch("http://localhost:3001/api/complaints",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json"},
-      body:JSON.stringify({
-        title,
-        description,
-        category,
-        location
-      })
-    });
+    try{
+      const res = await fetch("/api/complaints",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          title,
+          description,
+          category,
+          location
+        })
+      });
 
-    const data = await res.json();
-    alert("Complaint ID: "+data.complaintId);
+      const data = await res.json();
+      alert("Complaint ID: "+data.complaintId);
+
+      setTitle("");
+      setDescription("");
+
+    }catch{
+      alert("Submission failed");
+    }
   };
 
   const categories = [
-    "Infrastructure",
-    "Technology",
-    "Utilities",
-    "Safety",
-    "Sanitation",
-    "Other"
+    {name:"Infrastructure",desc:"Buildings, roads"},
+    {name:"Technology",desc:"Internet, computers"},
+    {name:"Utilities",desc:"Electricity, water"},
+    {name:"Safety",desc:"Security issues"},
+    {name:"Sanitation",desc:"Waste management"},
+    {name:"Other",desc:"General complaints"}
   ];
 
   return (
-    <div style={{
-      minHeight:"100vh",
-      background:"#f6f7fb",
-      padding:"30px",
-      fontFamily:"Arial"
-    }}>
+    <div className="min-h-screen bg-gray-50">
 
-      <div style={{
-        maxWidth:"800px",
-        margin:"auto",
-        background:"white",
-        padding:"30px",
-        borderRadius:"10px",
-        boxShadow:"0 5px 20px rgba(0,0,0,0.08)"
-      }}>
+      {/* Navbar */}
+      <div className="flex items-center justify-between px-6 py-4 bg-white shadow">
 
-        <h1 style={{fontSize:"30px",marginBottom:"20px"}}>
-          CampusVoice
-        </h1>
-
-        <p style={{marginBottom:"25px",color:"#555"}}>
-          Report campus issues anonymously
-        </p>
-
-        <form onSubmit={submitIssue}>
-
-          <div style={{
-            display:"grid",
-            gridTemplateColumns:"repeat(3,1fr)",
-            gap:"10px",
-            marginBottom:"20px"
-          }}>
-
-            {categories.map(cat=>(
-              <button
-                type="button"
-                key={cat}
-                onClick={()=>setCategory(cat)}
-                style={{
-                  padding:"10px",
-                  border:"1px solid #ddd",
-                  borderRadius:"6px",
-                  background: category===cat ? "#2563eb" : "white",
-                  color: category===cat ? "white" : "black",
-                  cursor:"pointer"
-                }}
-              >
-                {cat}
-              </button>
-            ))}
-
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center text-white text-xl">
+            +
           </div>
 
+          <h1 className="text-xl font-semibold">
+            Campus<span className="text-emerald-500">Voice</span>
+          </h1>
+        </div>
+
+        <div className="text-2xl">☰</div>
+
+      </div>
+
+      {/* Hero */}
+      <div className="text-center mt-12 px-6">
+
+        <h2 className="text-4xl font-bold text-gray-800">
+          Report Campus Issues
+          <span className="text-emerald-500"> Anonymously</span>
+        </h2>
+
+        <p className="text-gray-500 mt-4 max-w-xl mx-auto">
+          Help improve our campus by reporting issues.
+          No registration required. Track your complaint with a unique ID.
+        </p>
+
+      </div>
+
+      {/* Form Card */}
+      <div className="max-w-xl mx-auto mt-10 bg-white rounded-xl shadow p-6">
+
+        <h3 className="text-xl font-semibold mb-1">
+          Submit a New Issue
+        </h3>
+
+        <p className="text-gray-500 mb-6">
+          Describe the problem you've encountered.
+        </p>
+
+        {/* Categories */}
+
+        <div className="grid grid-cols-2 gap-4 mb-6">
+
+          {categories.map(cat=>(
+            <button
+              key={cat.name}
+              type="button"
+              onClick={()=>setCategory(cat.name)}
+              className={`border rounded-lg p-4 text-left transition
+              ${category===cat.name
+              ? "border-emerald-500 bg-emerald-50"
+              : "border-gray-200"}`}
+            >
+              <div className="font-semibold">{cat.name}</div>
+              <div className="text-sm text-gray-500">{cat.desc}</div>
+            </button>
+          ))}
+
+        </div>
+
+        <form onSubmit={submitIssue} className="space-y-4">
+
           <input
-            placeholder="Location"
+            placeholder="Select campus location"
             value={location}
             onChange={e=>setLocation(e.target.value)}
-            style={{
-              width:"100%",
-              padding:"12px",
-              marginBottom:"15px",
-              border:"1px solid #ddd",
-              borderRadius:"6px"
-            }}
+            className="w-full border rounded-lg p-3"
           />
 
           <input
-            placeholder="Issue title"
+            placeholder="Brief summary of the issue"
             value={title}
             onChange={e=>setTitle(e.target.value)}
-            style={{
-              width:"100%",
-              padding:"12px",
-              marginBottom:"15px",
-              border:"1px solid #ddd",
-              borderRadius:"6px"
-            }}
+            className="w-full border rounded-lg p-3"
           />
 
           <textarea
-            placeholder="Describe the issue..."
+            placeholder="Provide as much detail as possible"
             value={description}
             onChange={e=>setDescription(e.target.value)}
-            rows="4"
-            style={{
-              width:"100%",
-              padding:"12px",
-              marginBottom:"20px",
-              border:"1px solid #ddd",
-              borderRadius:"6px"
-            }}
+            rows={4}
+            className="w-full border rounded-lg p-3"
           />
 
           <button
-            style={{
-              width:"100%",
-              padding:"12px",
-              background:"#2563eb",
-              color:"white",
-              border:"none",
-              borderRadius:"6px",
-              cursor:"pointer",
-              fontWeight:"bold"
-            }}
+            className="w-full bg-emerald-500 text-white py-3 rounded-lg font-semibold"
           >
             Submit Issue
           </button>
+
+          <div className="text-center text-emerald-600 cursor-pointer">
+            Track Complaint
+          </div>
 
         </form>
 
