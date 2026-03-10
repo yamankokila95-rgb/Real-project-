@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router";
+import { useSearchParams } from "react-router-dom";
 import Header from "../components/Header";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
+
 import {
   Search,
   Clock,
@@ -20,9 +21,10 @@ import {
   MapPin,
   Calendar,
 } from "lucide-react";
+
 import type { Complaint } from "@/shared/types";
 
-const statusConfig = {
+const statusConfig: any = {
   pending: {
     label: "Pending Review",
     color: "bg-amber-100 text-amber-700 border-amber-200",
@@ -64,7 +66,7 @@ const locationLabels: Record<string, string> = {
   other: "Other",
 };
 
-function formatDate(dateString: string): string {
+function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
@@ -74,48 +76,49 @@ function formatDate(dateString: string): string {
 
 export default function Track() {
   const [searchParams] = useSearchParams();
+
   const [trackingId, setTrackingId] = useState(searchParams.get("id") || "");
   const [complaint, setComplaint] = useState<Complaint | null>(null);
+
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const idFromUrl = searchParams.get("id");
-    if (idFromUrl) {
-      setTrackingId(idFromUrl);
-      handleSearch(idFromUrl);
-    }
-  }, [searchParams]);
-
-  const handleSearch = async (id?: string) => {
-    const searchId = id || trackingId;
-    if (!searchId.trim()) return;
+  const handleSearch = async () => {
+    const id = trackingId || searchParams.get("id");
+    if (!id) return;
 
     setLoading(true);
-    setSearched(true);
     setError("");
 
     try {
-      const response = await fetch(
-        `/api/complaints/${encodeURIComponent(searchId)}`
-      );
+      const res = await fetch("/api/complaints");
+      const data = await res.json();
 
-      if (response.status === 404) {
+      const found = data.find((c: any) => c.id === id);
+
+      if (!found) {
+        setError("Complaint not found");
         setComplaint(null);
-      } else if (!response.ok) {
-        throw new Error("Failed to fetch complaint");
       } else {
-        const data = await response.json();
-        setComplaint(data);
+        setComplaint(found);
       }
-    } catch {
-      setError("An error occurred while searching. Please try again.");
-      setComplaint(null);
-    } finally {
-      setLoading(false);
+
+      setSearched(true);
+    } catch (err) {
+      setError("Error fetching complaint");
     }
+
+    setLoading(false);
   };
+
+  useEffect(() => {
+    const id = searchParams.get("id");
+    if (id) {
+      setTrackingId(id);
+      handleSearch();
+    }
+  }, [searchParams]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,208 +129,108 @@ export default function Track() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <section className="bg-gradient-to-br from-primary/5 via-background to-accent/5 border-b border-border">
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          <div className="text-center max-w-2xl mx-auto">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Track Your <span className="text-primary">Complaint</span>
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              Enter your complaint ID to check the current status and any
-              updates from the administration.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <main className="max-w-3xl mx-auto px-4 py-8 md:py-12">
-        {/* Search Form */}
-        <Card className="shadow-lg border-border mb-8">
+      <main className="max-w-3xl mx-auto px-4 py-10">
+        {/* SEARCH */}
+        <Card className="mb-8">
           <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="flex gap-3">
-              <div className="flex-1">
-                <Label htmlFor="trackingId" className="sr-only">
-                  Complaint ID
-                </Label>
-                <Input
-                  id="trackingId"
-                  placeholder="Enter your Complaint ID (e.g., CV-ABC123)"
-                  value={trackingId}
-                  onChange={(e) => setTrackingId(e.target.value)}
-                  className="h-12 text-lg font-mono"
-                />
-              </div>
-              <Button type="submit" size="lg" className="h-12 px-6">
-                <Search className="w-5 h-5 mr-2" />
+              <Input
+                placeholder="Enter Complaint ID"
+                value={trackingId}
+                onChange={(e) => setTrackingId(e.target.value)}
+              />
+
+              <Button type="submit">
+                <Search className="w-4 h-4 mr-2" />
                 Track
               </Button>
             </form>
           </CardContent>
         </Card>
 
-        {/* Results */}
+        {/* LOADING */}
         {loading && (
-          <div className="text-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-            <p className="text-muted-foreground mt-3">
-              Looking up your complaint...
-            </p>
+          <div className="text-center py-10">
+            <Loader2 className="animate-spin mx-auto mb-2" />
+            <p>Loading complaint...</p>
           </div>
         )}
 
+        {/* ERROR */}
         {!loading && error && (
-          <Card className="border-destructive/30 bg-destructive/5">
-            <CardContent className="pt-6 text-center py-12">
-              <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                Error
-              </h3>
-              <p className="text-muted-foreground">{error}</p>
+          <Card>
+            <CardContent className="text-center py-10">
+              <AlertCircle className="mx-auto mb-3" />
+              <p>{error}</p>
             </CardContent>
           </Card>
         )}
 
-        {!loading && !error && searched && !complaint && (
-          <Card className="border-destructive/30 bg-destructive/5">
-            <CardContent className="pt-6 text-center py-12">
-              <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                Complaint Not Found
-              </h3>
-              <p className="text-muted-foreground">
-                No complaint found with ID "
-                <span className="font-mono">{trackingId}</span>".
-                <br />
-                Please check the ID and try again.
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
+        {/* RESULT */}
         {!loading && complaint && (
-          <div className="space-y-6">
-            {/* Status Card */}
-            <Card className="shadow-lg border-border overflow-hidden">
-              <div
-                className={`h-2 ${
-                  complaint.status === "pending"
-                    ? "bg-amber-500"
-                    : complaint.status === "in-progress"
-                    ? "bg-blue-500"
-                    : "bg-emerald-500"
-                }`}
-              />
-              <CardHeader className="pb-4">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground font-mono mb-1">
-                      {complaint.complaint_id}
-                    </p>
-                    <CardTitle className="text-xl">{complaint.title}</CardTitle>
-                  </div>
-                  <div
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full border ${
-                      statusConfig[complaint.status].color
-                    }`}
-                  >
-                    {(() => {
-                      const Icon = statusConfig[complaint.status].icon;
-                      return (
-                        <Icon
-                          className={`w-4 h-4 ${
-                            complaint.status === "in-progress"
-                              ? "animate-spin"
-                              : ""
-                          }`}
-                        />
-                      );
-                    })()}
-                    <span className="font-medium text-sm">
-                      {statusConfig[complaint.status].label}
-                    </span>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <p className="text-foreground">{complaint.description}</p>
+          <Card>
+            {/* STATUS BAR */}
+            <div
+              className={`h-2 ${
+                complaint.status === "pending"
+                  ? "bg-amber-500"
+                  : complaint.status === "in-progress"
+                  ? "bg-blue-500"
+                  : "bg-emerald-500"
+              }`}
+            />
 
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-                      <Building2 className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Category</p>
-                      <p className="font-medium text-foreground">
-                        {categoryLabels[complaint.category] ||
-                          complaint.category}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-                      <MapPin className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Location</p>
-                      <p className="font-medium text-foreground">
-                        {locationLabels[complaint.location] ||
-                          complaint.location}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-                      <Calendar className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Submitted</p>
-                      <p className="font-medium text-foreground">
-                        {formatDate(complaint.created_at)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-                      <Clock className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Last Updated</p>
-                      <p className="font-medium text-foreground">
-                        {formatDate(complaint.updated_at)}
-                      </p>
-                    </div>
-                  </div>
+            <CardHeader>
+              <CardTitle>{complaint.title}</CardTitle>
+            </CardHeader>
+
+            <CardContent className="space-y-5">
+              <p>{complaint.description}</p>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex gap-2 items-center">
+                  <Building2 size={16} />
+                  <span>
+                    {categoryLabels[complaint.category] || complaint.category}
+                  </span>
                 </div>
 
-                {complaint.admin_notes && (
-                  <div className="bg-muted rounded-xl p-4 border border-border">
-                    <p className="text-sm font-medium text-foreground mb-1">
-                      Admin Notes
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {complaint.admin_notes}
-                    </p>
-                  </div>
-                )}
-
-                <div className="bg-primary/5 rounded-xl p-4 border border-primary/20">
-                  <p className="text-sm text-primary font-medium">
-                    {statusConfig[complaint.status].description}
-                  </p>
+                <div className="flex gap-2 items-center">
+                  <MapPin size={16} />
+                  <span>
+                    {locationLabels[complaint.location] || complaint.location}
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+
+                <div className="flex gap-2 items-center">
+                  <Calendar size={16} />
+                  <span>{formatDate(complaint.createdAt)}</span>
+                </div>
+
+                <div className="flex gap-2 items-center">
+                  <Clock size={16} />
+                  <span>{statusConfig[complaint.status].label}</span>
+                </div>
+              </div>
+
+              {complaint.admin_notes && (
+                <div className="border p-3 rounded">
+                  <strong>Admin Notes</strong>
+                  <p>{complaint.admin_notes}</p>
+                </div>
+              )}
+
+              <div className="p-3 rounded bg-primary/5">
+                {statusConfig[complaint.status].description}
+              </div>
+            </CardContent>
+          </Card>
         )}
 
-        {/* Help Text */}
         {!searched && (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">
-              Enter your complaint ID above to see the current status.
-            </p>
-          </div>
+          <p className="text-center text-muted-foreground">
+            Enter your complaint ID to track status
+          </p>
         )}
       </main>
     </div>

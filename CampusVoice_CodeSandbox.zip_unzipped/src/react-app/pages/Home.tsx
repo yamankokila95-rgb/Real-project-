@@ -32,7 +32,7 @@ export default function Home() {
 
       const data = await res.json();
 
-      alert("Complaint ID: " + data.complaintId);
+      alert(`Complaint ID: ${data.id || data.complaint?.id}`);
 
       setTitle("");
       setDescription("");

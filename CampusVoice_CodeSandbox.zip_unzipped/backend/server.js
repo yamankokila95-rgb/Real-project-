@@ -6,8 +6,34 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 import complaintsRoute from "./routes/complaints.js";
-app.use("/api", complaintsRoute);
 let complaints = [];
+// Create complaint
+app.post("/api/complaints", (req, res) => {
+  const { title, description, category, location } = req.body;
+
+  if (!title || !description || !category || !location) {
+    return res.status(400).json({ error: "Missing fields" });
+  }
+
+  const complaint = {
+    id: randomUUID(),
+    title,
+    description,
+    category,
+    location,
+    status: "pending",
+    createdAt: new Date(),
+  };
+
+  complaints.push(complaint);
+
+  res.json(complaint);
+});
+
+// Get complaints
+app.get("/api/complaints", (req, res) => {
+  res.json(complaints);
+});
 
 // rate limit memory
 const rateLimit = {};
@@ -21,11 +47,6 @@ const checkRate = (ip) => {
 
 // Create complaint
 app.post("/api/complaints", (req, res) => {
-  const ip = req.ip;
-  if (!checkRate(ip)) {
-    return res.status(429).json({ error: "Too many requests" });
-  }
-
   const { title, description, category, location } = req.body;
 
   if (!title || !description || !category || !location) {
@@ -47,12 +68,8 @@ app.post("/api/complaints", (req, res) => {
   };
 
   complaints.push(complaint);
-  res.json(complaint);
-});
 
-// Get complaints
-app.get("/api/complaints", (req, res) => {
-  res.json(complaints);
+  res.json(complaint);
 });
 
 // Admin update status
