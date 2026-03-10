@@ -1,4 +1,3 @@
-
 import express from "express";
 import cors from "cors";
 import { randomUUID } from "crypto";
@@ -6,7 +5,8 @@ import { randomUUID } from "crypto";
 const app = express();
 app.use(cors());
 app.use(express.json());
-
+import complaintsRoute from "./routes/complaints.js";
+app.use("/api", complaintsRoute);
 let complaints = [];
 
 // rate limit memory
@@ -43,7 +43,7 @@ app.post("/api/complaints", (req, res) => {
     category,
     location,
     status: "Submitted",
-    createdAt: new Date()
+    createdAt: new Date(),
   };
 
   complaints.push(complaint);
@@ -60,7 +60,7 @@ app.patch("/api/admin/complaints/:id", (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 
-  const comp = complaints.find(c => c.id === id);
+  const comp = complaints.find((c) => c.id === id);
   if (!comp) {
     return res.status(404).json({ error: "Not found" });
   }
