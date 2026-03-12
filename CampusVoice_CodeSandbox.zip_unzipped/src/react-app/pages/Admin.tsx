@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Header from "../components/Header";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -33,7 +34,15 @@ export default function AdminPage() {
     { name: "In Progress", value: inProgress },
     { name: "Resolved", value: resolved },
   ];
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    const isAdmin = localStorage.getItem("admin");
+
+    if (!isAdmin) {
+      navigate("/admin-login");
+    }
+  }, []);
   const COLORS = ["#facc15", "#3b82f6", "#10b981"];
 
   const loadComplaints = async () => {
@@ -72,7 +81,18 @@ export default function AdminPage() {
       <Header />
 
       <main className="max-w-5xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              localStorage.removeItem("admin");
+              window.location.href = "/admin-login";
+            }}
+          >
+            Logout
+          </Button>
+        </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card>
