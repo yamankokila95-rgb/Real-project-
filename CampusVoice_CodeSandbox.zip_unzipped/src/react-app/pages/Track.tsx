@@ -3,110 +3,87 @@ import { useSearchParams } from "react-router-dom";
 import Header from "../components/Header";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
 import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "../components/ui/card";
 
 import {
   Search,
-  Clock,
   Loader2,
-  CheckCircle,
-  AlertCircle,
+  Clock,
   Building2,
   MapPin,
-  Calendar,
+  Calendar
 } from "lucide-react";
 
-import type { Complaint } from "@/shared/types";
+type Complaint = {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  location: string;
+  status: string;
+  createdAt: string;
+};
 
 const statusConfig: any = {
-  pending: {
-    label: "Pending Review",
-    color: "bg-amber-100 text-amber-700 border-amber-200",
-    icon: Clock,
-    description: "Your issue is awaiting review by the administration.",
+  Submitted: {
+    label: "Submitted",
+    color: "bg-amber-100 text-amber-700",
+    description: "Your complaint has been submitted and is awaiting review."
   },
   "in-progress": {
     label: "In Progress",
-    color: "bg-blue-100 text-blue-700 border-blue-200",
-    icon: Loader2,
-    description: "The administration is actively working on your issue.",
+    color: "bg-blue-100 text-blue-700",
+    description: "Administration is working on your issue."
   },
   resolved: {
     label: "Resolved",
-    color: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    icon: CheckCircle,
-    description: "Your issue has been resolved.",
-  },
-};
-
-const categoryLabels: Record<string, string> = {
-  infrastructure: "Infrastructure",
-  technology: "Technology",
-  utilities: "Utilities",
-  safety: "Safety & Security",
-  sanitation: "Sanitation",
-  other: "Other",
-};
-
-const locationLabels: Record<string, string> = {
-  "main-building": "Main Building",
-  library: "Library",
-  "science-block": "Science Block",
-  cafeteria: "Cafeteria",
-  "sports-complex": "Sports Complex",
-  dormitory: "Dormitory",
-  parking: "Parking Area",
-  outdoor: "Outdoor/Campus Grounds",
-  other: "Other",
+    color: "bg-emerald-100 text-emerald-700",
+    description: "Your issue has been resolved."
+  }
 };
 
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
-    day: "numeric",
+    day: "numeric"
   });
 }
 
 export default function Track() {
   const [searchParams] = useSearchParams();
 
-  const [trackingId, setTrackingId] = useState(searchParams.get("id") || "");
-  const [complaint, setComplaint] = useState<Complaint | null>(null);
+  const [trackingId, setTrackingId] = useState(
+    searchParams.get("id") || ""
+  );
 
-  const [searched, setSearched] = useState(false);
+  const [complaint, setComplaint] = useState<Complaint | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleSearch = async () => {
-    const id = trackingId || searchParams.get("id");
-    if (!id) return;
+    if (!trackingId) return;
 
     setLoading(true);
     setError("");
 
     try {
-      const res = await fetch("/api/complaints");
-      const data = await res.json();
+      const res = await fetch(`/api/complaints/${trackingId}`);
 
-      const found = data.find((c: any) => c.id === id);
-
-      if (!found) {
-        setError("Complaint not found");
-        setComplaint(null);
-      } else {
-        setComplaint(found);
+      if (!res.ok) {
+        throw new Error("Complaint not found");
       }
 
-      setSearched(true);
+      const data = await res.json();
+      setComplaint(data);
     } catch (err) {
-      setError("Error fetching complaint");
+      setError("Complaint not found");
+      setComplaint(null);
     }
 
     setLoading(false);
@@ -114,9 +91,12 @@ export default function Track() {
 
   useEffect(() => {
     const id = searchParams.get("id");
+
     if (id) {
       setTrackingId(id);
-      handleSearch();
+      setTimeout(() => {
+        handleSearch();
+      }, 200);
     }
   }, [searchParams]);
 
@@ -129,15 +109,22 @@ export default function Track() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="max-w-3xl mx-auto px-4 py-10">
-        {/* SEARCH */}
+      <main className="max-w-3xl mx-auto px-4 py-20">
+
+        {/* SEARCH CARD */}
+
         <Card className="mb-8">
           <CardContent className="pt-6">
-            <form onSubmit={handleSubmit} className="flex gap-3">
+            <form
+              onSubmit={handleSubmit}
+              className="flex gap-3"
+            >
               <Input
                 placeholder="Enter Complaint ID"
                 value={trackingId}
-                onChange={(e) => setTrackingId(e.target.value)}
+                onChange={(e) =>
+                  setTrackingId(e.target.value)
+                }
               />
 
               <Button type="submit">
@@ -149,6 +136,7 @@ export default function Track() {
         </Card>
 
         {/* LOADING */}
+
         {loading && (
           <div className="text-center py-10">
             <Loader2 className="animate-spin mx-auto mb-2" />
@@ -157,49 +145,84 @@ export default function Track() {
         )}
 
         {/* ERROR */}
+
         {!loading && error && (
           <Card>
             <CardContent className="text-center py-10">
-              <AlertCircle className="mx-auto mb-3" />
-              <p>{error}</p>
+              <p className="text-red-500">{error}</p>
             </CardContent>
           </Card>
         )}
 
         {/* RESULT */}
-        {!loading && complaint && (
-          <Card>
-            {/* STATUS BAR */}
-            <div
-              className={`h-2 ${
-                complaint.status === "pending"
-                  ? "bg-amber-500"
-                  : complaint.status === "in-progress"
-                  ? "bg-blue-500"
-                  : "bg-emerald-500"
-              }`}
-            />
 
+        {!loading && complaint && (
+          <Card className="shadow-xl border rounded-2xl">
             <CardHeader>
-              <CardTitle>{complaint.title}</CardTitle>
+              <CardTitle className="flex justify-between">
+                {complaint.title}
+
+                <span
+                  className={`text-xs px-3 py-1 rounded-full ${
+                    statusConfig[complaint.status]?.color
+                  }`}
+                >
+                  {statusConfig[complaint.status]?.label ||
+                    complaint.status}
+                </span>
+              </CardTitle>
             </CardHeader>
 
             <CardContent className="space-y-5">
-              <p>{complaint.description}</p>
+              {/* STATUS PROGRESS */}
+<div className="flex items-center justify-between mb-4">
 
-              <div className="grid grid-cols-2 gap-4">
+<div className="flex flex-col items-center">
+<div className={`w-4 h-4 rounded-full ${
+complaint.status === "Submitted" ||
+complaint.status === "in-progress" ||
+complaint.status === "resolved"
+? "bg-green-500"
+: "bg-gray-300"
+}`} />
+<p className="text-xs mt-1">Submitted</p>
+</div>
+
+<div className="flex flex-col items-center">
+<div className={`w-4 h-4 rounded-full ${
+complaint.status === "in-progress" ||
+complaint.status === "resolved"
+? "bg-green-500"
+: "bg-gray-300"
+}`} />
+<p className="text-xs mt-1">In Progress</p>
+</div>
+
+<div className="flex flex-col items-center">
+<div className={`w-4 h-4 rounded-full ${
+complaint.status === "resolved"
+? "bg-green-500"
+: "bg-gray-300"
+}`} />
+<p className="text-xs mt-1">Resolved</p>
+</div>
+
+</div>
+
+              <p className="text-gray-700">
+                {complaint.description}
+              </p>
+
+              <div className="grid grid-cols-2 gap-4 text-sm">
+
                 <div className="flex gap-2 items-center">
                   <Building2 size={16} />
-                  <span>
-                    {categoryLabels[complaint.category] || complaint.category}
-                  </span>
+                  <span>{complaint.category}</span>
                 </div>
 
                 <div className="flex gap-2 items-center">
                   <MapPin size={16} />
-                  <span>
-                    {locationLabels[complaint.location] || complaint.location}
-                  </span>
+                  <span>{complaint.location}</span>
                 </div>
 
                 <div className="flex gap-2 items-center">
@@ -209,29 +232,35 @@ export default function Track() {
 
                 <div className="flex gap-2 items-center">
                   <Clock size={16} />
-                  <span>{statusConfig[complaint.status].label}</span>
+                  <div className="flex items-center gap-2">
+<span>ID: {complaint.id}</span>
+
+<button
+className="text-xs px-2 py-1 bg-gray-200 rounded"
+onClick={() => navigator.clipboard.writeText(complaint.id)}
+>
+Copy
+</button>
+
+</div>
                 </div>
+
               </div>
 
-              {complaint.admin_notes && (
-                <div className="border p-3 rounded">
-                  <strong>Admin Notes</strong>
-                  <p>{complaint.admin_notes}</p>
-                </div>
-              )}
-
-              <div className="p-3 rounded bg-primary/5">
-                {statusConfig[complaint.status].description}
+              <div className="p-4 bg-gray-50 rounded-lg">
+                {statusConfig[complaint.status]?.description}
               </div>
+
             </CardContent>
           </Card>
         )}
 
-        {!searched && (
+        {!loading && !complaint && !error && (
           <p className="text-center text-muted-foreground">
             Enter your complaint ID to track status
           </p>
         )}
+
       </main>
     </div>
   );

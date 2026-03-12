@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Building2, Wifi, Zap, Shield, Trash2, HelpCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
+  const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
@@ -32,7 +34,7 @@ export default function Home() {
 
       const data = await res.json();
 
-      alert(`Complaint ID: ${data.id || data.complaint?.id}`);
+      navigate(`/track?id=${data.id}`);
 
       setTitle("");
       setDescription("");
@@ -184,12 +186,16 @@ export default function Home() {
           <button className="w-full bg-emerald-500 text-white py-3 rounded-lg font-semibold">
             Submit Issue Report
           </button>
-
-          <div className="text-center text-emerald-600 cursor-pointer">
-            Track Complaint
-          </div>
         </form>
       </div>
     </div>
   );
 }
+<div className="mt-4 flex justify-center">
+  <button
+    onClick={() => navigate("/track")}
+    className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition"
+  >
+    🔍 Track Complaint
+  </button>
+</div>;

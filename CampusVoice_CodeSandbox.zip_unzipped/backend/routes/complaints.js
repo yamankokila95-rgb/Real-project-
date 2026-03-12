@@ -16,12 +16,12 @@ router.post("/complaints", (req, res) => {
     description,
     category,
     location,
-    status: "Submitted",
-    createdAt: new Date()
+    status: "pending",
+    createdAt: new Date(),
   };
 
   res.json({
-    complaintId: complaint.id
+    complaintId: complaint.id,
   });
 });
 

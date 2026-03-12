@@ -7,32 +7,22 @@ app.use(cors());
 app.use(express.json());
 import complaintsRoute from "./routes/complaints.js";
 let complaints = [];
-// Create complaint
-app.post("/api/complaints", (req, res) => {
-  const { title, description, category, location } = req.body;
-
-  if (!title || !description || !category || !location) {
-    return res.status(400).json({ error: "Missing fields" });
-  }
-
-  const complaint = {
-    id: randomUUID(),
-    title,
-    description,
-    category,
-    location,
-    status: "pending",
-    createdAt: new Date(),
-  };
-
-  complaints.push(complaint);
-
-  res.json(complaint);
-});
 
 // Get complaints
 app.get("/api/complaints", (req, res) => {
   res.json(complaints);
+});
+// Get single complaint
+app.get("/api/complaints/:id", (req, res) => {
+  const { id } = req.params;
+
+  const comp = complaints.find((c) => c.id === id);
+
+  if (!comp) {
+    return res.status(404).json({ error: "Complaint not found" });
+  }
+
+  res.json(comp);
 });
 
 // rate limit memory
