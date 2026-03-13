@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
+
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
+
 import { Button } from "../components/ui/button";
+
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 type Complaint = {
@@ -21,38 +24,27 @@ type Complaint = {
 };
 
 export default function AdminPage() {
+  const navigate = useNavigate();
+
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [loading, setLoading] = useState(true);
-  const total = complaints.length;
-  const submitted = complaints.filter((c) => c.status === "Submitted").length;
-  const inProgress = complaints.filter(
-    (c) => c.status === "in-progress"
-  ).length;
-  const resolved = complaints.filter((c) => c.status === "resolved").length;
-  const chartData = [
-    { name: "Submitted", value: submitted },
-    { name: "In Progress", value: inProgress },
-    { name: "Resolved", value: resolved },
-  ];
-  const navigate = useNavigate();
 
   useEffect(() => {
     const isAdmin = localStorage.getItem("admin");
-
     if (!isAdmin) {
       navigate("/admin-login");
     }
   }, []);
-  const COLORS = ["#facc15", "#3b82f6", "#10b981"];
 
   const loadComplaints = async () => {
     try {
       const res = await fetch("/api/complaints");
       const data = await res.json();
       setComplaints(data);
-    } catch (err) {
+    } catch {
       console.error("Error loading complaints");
     }
+
     setLoading(false);
   };
 
@@ -76,13 +68,29 @@ export default function AdminPage() {
     }
   };
 
+  const total = complaints.length;
+  const submitted = complaints.filter((c) => c.status === "Submitted").length;
+  const inProgress = complaints.filter(
+    (c) => c.status === "in-progress"
+  ).length;
+  const resolved = complaints.filter((c) => c.status === "resolved").length;
+
+  const chartData = [
+    { name: "Submitted", value: submitted },
+    { name: "In Progress", value: inProgress },
+    { name: "Resolved", value: resolved },
+  ];
+
+  const COLORS = ["#facc15", "#3b82f6", "#10b981"];
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <main className="max-w-5xl mx-auto p-6">
+      <main className="max-w-6xl mx-auto px-6 py-10">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+
           <Button
             variant="destructive"
             onClick={() => {
@@ -94,35 +102,40 @@ export default function AdminPage() {
           </Button>
         </div>
 
+        {/* Stats Cards */}
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card>
             <CardContent className="p-4 text-center">
-              <p className="text-sm text-muted-foreground">Total</p>
+              <p className="text-sm text-gray-500">Total</p>
               <p className="text-2xl font-bold">{total}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-4 text-center">
-              <p className="text-sm text-muted-foreground">Submitted</p>
+              <p className="text-sm text-gray-500">Submitted</p>
               <p className="text-2xl font-bold">{submitted}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-4 text-center">
-              <p className="text-sm text-muted-foreground">In Progress</p>
+              <p className="text-sm text-gray-500">In Progress</p>
               <p className="text-2xl font-bold">{inProgress}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-4 text-center">
-              <p className="text-sm text-muted-foreground">Resolved</p>
+              <p className="text-sm text-gray-500">Resolved</p>
               <p className="text-2xl font-bold">{resolved}</p>
             </CardContent>
           </Card>
         </div>
+
+        {/* Pie Chart */}
+
         <Card className="mb-8">
           <CardContent className="p-6">
             <h2 className="text-lg font-semibold mb-4">
@@ -151,13 +164,15 @@ export default function AdminPage() {
           </CardContent>
         </Card>
 
+        {/* Complaint List */}
+
         {loading && <p>Loading complaints...</p>}
 
         {!loading && complaints.length === 0 && <p>No complaints found</p>}
 
         {!loading &&
           complaints.map((c) => (
-            <Card key={c.id} className="mb-5 shadow-lg border rounded-2xl">
+            <Card key={c.id} className="mb-5">
               <CardHeader>
                 <CardTitle className="flex justify-between">
                   {c.title}
@@ -179,11 +194,7 @@ export default function AdminPage() {
                   <b>Location:</b> {c.location}
                 </p>
 
-                <p className="text-sm mb-4">
-                  <b>Status:</b> {c.status}
-                </p>
-
-                <div className="flex gap-3 flex-wrap">
+                <div className="flex gap-3 mt-4">
                   <Button onClick={() => updateStatus(c.id, "Submitted")}>
                     Pending
                   </Button>

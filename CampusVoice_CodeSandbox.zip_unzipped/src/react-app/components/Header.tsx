@@ -1,10 +1,22 @@
 import { Link, useLocation } from "react-router";
 import { MessageSquarePlus, Search, Shield, Menu, X } from "lucide-react";
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
+import { Moon, Sun } from "lucide-react";
 export default function Header() {
+  const [darkMode, setDarkMode] = useState(false);
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const toggleTheme = () => {
+    setDarkMode((prev) => !prev);
+
+    useEffect(() => {
+      if (darkMode) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    }, [darkMode]);
+  };
 
   const navLinks = [
     { path: "/", label: "Report Issue", icon: MessageSquarePlus },
@@ -30,11 +42,12 @@ export default function Header() {
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = location.pathname === link.path;
+
               return (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm ${
                     isActive
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -45,6 +58,14 @@ export default function Header() {
                 </Link>
               );
             })}
+
+            {/* DARK MODE BUTTON */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg hover:bg-gray-200 ml-2"
+            >
+              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
           </nav>
 
           {/* Mobile Menu Button */}
