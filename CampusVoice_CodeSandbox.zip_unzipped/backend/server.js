@@ -1,28 +1,32 @@
 import express from "express";
 import cors from "cors";
 import { randomUUID } from "crypto";
+const db = require("./database");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 import complaintsRoute from "./routes/complaints.js";
-let complaints = [];
 
 // Get complaints
 app.get("/api/complaints", (req, res) => {
-  res.json(complaints);
+  db.all("SELECT * FROM complaints", [], (err, rows) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+    res.json(rows);
+  });
 });
 // Get single complaint
 app.get("/api/complaints/:id", (req, res) => {
   const { id } = req.params;
 
-  const comp = complaints.find((c) => c.id === id);
+  db.get("SELECT * FROM complaints WHERE id = ?", [id], (err, row) => {
+    if (err) return res.status(500).json(err);
+    if (!row) return res.status(404).json({ error: "Complaint not found" });
 
-  if (!comp) {
-    return res.status(404).json({ error: "Complaint not found" });
-  }
-
-  res.json(comp);
+    res.json(row);
+  });
 });
 
 // rate limit memory
@@ -47,19 +51,25 @@ app.post("/api/complaints", (req, res) => {
     return res.status(400).json({ error: "Input too long" });
   }
 
-  const complaint = {
-    id: randomUUID(),
-    title,
-    description,
-    category,
-    location,
-    status: "Submitted",
-    createdAt: new Date(),
-  };
+  db.run(
+    `INSERT INTO complaints (title, description, category, location)
+   VALUES (?, ?, ?, ?)`,
+    [title, description, category, location],
+    function (err) {
+      if (err) {
+        return res.status(500).json(err);
+      }
 
-  complaints.push(complaint);
-
-  res.json(complaint);
+      res.json({
+        id: this.lastID,
+        title,
+        description,
+        category,
+        location,
+        status: "Submitted",
+      });
+    }
+  );
 });
 
 // Admin update status
@@ -67,13 +77,15 @@ app.patch("/api/admin/complaints/:id", (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 
-  const comp = complaints.find((c) => c.id === id);
-  if (!comp) {
-    return res.status(404).json({ error: "Not found" });
-  }
+  db.run(
+    "UPDATE complaints SET status = ? WHERE id = ?",
+    [status, id],
+    function (err) {
+      if (err) return res.status(500).json(err);
 
-  comp.status = status || comp.status;
-  res.json(comp);
+      res.json({ message: "Status updated" });
+    }
+  );
 });
 
 app.post("/api/logout", (_, res) => {
